@@ -1,6 +1,25 @@
 import datetime
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.base_user import BaseUserManager
+
+
+class UserManager(BaseUserManager):
+    use_in_migrations = True
+    
+    def create_superuser(self, email, password):
+        user: User = self.model(
+            email=self.normalize_email(email),
+            birthday="2000-01-01",
+            first_name="admin",
+            last_name="admin",
+        )
+        user.set_password(password)
+        user.is_staff = True
+        user.is_superuser = True
+        user.active = True
+        user.save(using=self._db)
+        return user
 
 
 class User(AbstractUser):
@@ -14,3 +33,5 @@ class User(AbstractUser):
     USERNAME_FIELD = 'email'
 
     REQUIRED_FIELDS = []
+
+    objects = UserManager()
